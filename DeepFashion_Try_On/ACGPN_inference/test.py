@@ -192,7 +192,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             cv2.imwrite('sample/'+data['name'][0],bgr)
 
             cv2.imwrite(f"label/{data['name'][0]}.png", (a[0].permute(1,2,0).cpu().numpy() * 255).astype(np.uint8))
-            cv2.imwrite(f"clothes_mask/{data['name'][0]}.png", (d[0].permute(1,2,0).cpu().numpy() * 255).astype(np.uint8))
+            # cv2.imwrite(f"clothes_mask/{data['name'][0]}.png", (d[0].permute(1,2,0).cpu().numpy() * 255).astype(np.uint8))
             cv2.imwrite(f"real_image/{data['name'][0]}.png", (b[0].permute(1,2,0).cpu().numpy() * 255).astype(np.uint8))
             cv2.imwrite(f"fake_image/{data['name'][0]}.png", (c[0].permute(1,2,0).cpu().numpy() * 255).astype(np.uint8))
             cv2.imwrite(f"rgb/{data['name'][0]}.png", (rgb * 255).astype(np.uint8))
