@@ -78,16 +78,16 @@ os.makedirs('real_image',exist_ok=True)
 os.makedirs('fake_image',exist_ok=True)
 os.makedirs('rgb',exist_ok=True)
 
-opt = TestOptions().parse()
-# iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
-# if opt.continue_train:
-#     try:
-#         start_epoch, epoch_iter = np.loadtxt(iter_path , delimiter=',', dtype=int)
-#     except:
-#         start_epoch, epoch_iter = 1, 0
-#     print('Resuming from epoch %d at iteration %d' % (start_epoch, epoch_iter))        
-# else:    
-start_epoch, epoch_iter = 1, 0
+opt = TrainOptions().parse()
+iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
+if opt.continue_train:
+    try:
+        start_epoch, epoch_iter = np.loadtxt(iter_path , delimiter=',', dtype=int)
+    except:
+        start_epoch, epoch_iter = 1, 0
+    print('Resuming from epoch %d at iteration %d' % (start_epoch, epoch_iter))        
+else:    
+    start_epoch, epoch_iter = 1, 0
 
 # if opt.debug:
 #     opt.display_freq = 1
