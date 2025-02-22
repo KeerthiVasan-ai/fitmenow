@@ -9,39 +9,44 @@ import util.util as util
 from data.data_loader import CreateDataLoader
 
 def changearm(label):
-    arm1=torch.FloatTensor((label.cpu().numpy()==11).astype(np.int))
-    arm2=torch.FloatTensor((label.cpu().numpy()==13).astype(np.int))
-    noise=torch.FloatTensor((label.cpu().numpy()==7).astype(np.int))
-    label=label*(1-arm1)+arm1*4
-    label=label*(1-arm2)+arm2*4
-    label=label*(1-noise)+noise*4
+    arm1 = torch.FloatTensor((label.cpu().numpy() == 11).astype(np.int_))
+    arm2 = torch.FloatTensor((label.cpu().numpy() == 13).astype(np.int_))
+    noise = torch.FloatTensor((label.cpu().numpy() == 7).astype(np.int_))
+    label = label * (1 - arm1) + arm1 * 4
+    label = label * (1 - arm2) + arm2 * 4
+    label = label * (1 - noise) + noise * 4
     return label
 
+# Parse options
 opt = TrainOptions().parse()
 
 # Load model
 model = create_model(opt)
 
-def apply_dresses(person_image, dresses):
+def apply_dresses(person_image, label, mask, pose, dresses):
     """Applies each dress in 'dresses' to 'person_image' and saves the results."""
+    
+    # Ensure output directory exists
+    os.makedirs("output", exist_ok=True)
+
     for i, dress in enumerate(dresses):
         # Load dress mask
-        mask_clothes = torch.FloatTensor((dress['label'].cpu().numpy() == 4).astype(np.int))
-        mask_fore = torch.FloatTensor((dress['label'].cpu().numpy() > 0).astype(np.int))
+        mask_clothes = torch.FloatTensor((label.cpu().numpy() == 4).astype(np.int_))
+        mask_fore = torch.FloatTensor((label.cpu().numpy() > 0).astype(np.int_))
         img_fore = person_image * mask_fore
         img_fore_wc = img_fore * mask_fore
-        all_clothes_label = changearm(dress['label'])
+        all_clothes_label = changearm(label)
 
         # Forward Pass
         _, fake_image, _, _, _, _, _, _, rgb, _ = model(
-            Variable(dress['label'].cuda()),
+            Variable(label.cuda()),
             Variable(dress['edge'].cuda()),
             Variable(img_fore.cuda()),
             Variable(mask_clothes.cuda()),
             Variable(dress['color'].cuda()),
             Variable(all_clothes_label.cuda()),
             Variable(person_image.cuda()),
-            Variable(dress['pose'].cuda()),
+            Variable(pose.cuda()),
             Variable(person_image.cuda()),
             Variable(mask_fore.cuda())
         )
@@ -53,11 +58,21 @@ def apply_dresses(person_image, dresses):
         cv2.imwrite(f"output/dress_{i}.png", output_image)
         print(f"Saved output: output/dress_{i}.png")
 
-# Load single person image
+# Load single person image and its related data
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
-person_image = next(iter(dataset))['image']
-print(person_image)  # Use first image as the person
+person_data = next(iter(dataset))  # Fetch the first person sample
+
+person_image = person_data['image']
+person_label = person_data['label']
+person_mask = person_data['mask']
+person_pose = person_data['pose']
+
+# Debugging prints
+# print("Person Image Shape:", person_image.shape)
+# print("Label Shape:", person_label.shape)
+# print("Mask Shape:", person_mask.shape)
+# print("Pose Shape:", person_pose.shape)
 
 # Apply all dresses in the dataset to the single person image
-apply_dresses(person_image, dataset)
+apply_dresses(person_image, person_label, person_mask, person_pose, dataset)
