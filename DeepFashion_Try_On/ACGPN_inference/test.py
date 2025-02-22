@@ -183,7 +183,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         d=torch.cat([clothes_mask,clothes_mask,clothes_mask],1)
         combine = torch.cat([a[0],d[0],b[0],c[0],rgb[0]], 2).squeeze()
 
-        cv2.imwrite(f"rgb/{data['name'][0]}.png", (rgb * 255).astype(np.uint8))
+        cv2.imwrite(f"rgb/{data['name'][0]}.png", rgb)
 
         # combine=c[0].squeeze()
         cv_img=(combine.permute(1,2,0).detach().cpu().numpy()+1)/2
