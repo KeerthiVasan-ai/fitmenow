@@ -41,24 +41,6 @@ def generate_label_color(inputs):
 
     return input_label
 
-# def complete_compose(img,mask,label):
-#     label=label.cpu().numpy()
-#     M_f=label>0
-#     M_f=M_f.astype(np.int)
-#     M_f=torch.FloatTensor(M_f).cuda()
-#     masked_img=img*(1-mask)
-#     M_c=(1-mask.cuda())*M_f
-#     M_c=M_c+torch.zeros(img.shape).cuda()##broadcasting
-#     return masked_img,M_c,M_f
-
-# def compose(label,mask,color_mask,edge,color,noise):
-#     # check=check>0
-#     # print(check)
-#     masked_label=label*(1-mask)
-#     masked_edge=mask*edge
-#     masked_color_strokes=mask*(1-color_mask)*color
-#     masked_noise=mask*noise
-#     return masked_label,masked_edge,masked_color_strokes,masked_noise
 
 '''USED IN CODE'''
 def changearm(old_label):
@@ -106,10 +88,6 @@ model = create_model(opt)
 
 total_steps = (start_epoch-1) * dataset_size + epoch_iter
 
-# display_delta = total_steps % opt.display_freq
-# print_delta = total_steps % opt.print_freq
-# save_delta = total_steps % opt.save_latest_freq
-
 step = 0
 
 for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
@@ -122,15 +100,6 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         total_steps += opt.batchSize
         epoch_iter += opt.batchSize
 
-        # whether to collect output images
-        #save_fake = total_steps % opt.display_freq == display_delta
-        # save_fake = True
-
-        ##add gaussian noise channel
-        ## wash the label
-        # t_mask = torch.FloatTensor((data['label'].cpu().numpy() == 7).astype(np.float))
-        #
-        # data['label'] = data['label'] * (1 - t_mask) + t_mask * 4
         mask_clothes = torch.FloatTensor((data['label'].cpu().numpy() == 4).astype(np.int))
         mask_fore = torch.FloatTensor((data['label'].cpu().numpy() > 0).astype(np.int))
         img_fore = data['image'] * mask_fore
