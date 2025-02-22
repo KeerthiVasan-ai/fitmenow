@@ -56,7 +56,8 @@ def apply_dresses(person_image, dresses):
 # Load single person image
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
-person_image = next(iter(dataset))['image']  # Use first image as the person
+person_image = next(iter(dataset))['image']
+print(person_image)  # Use first image as the person
 
 # Apply all dresses in the dataset to the single person image
 apply_dresses(person_image, dataset)
