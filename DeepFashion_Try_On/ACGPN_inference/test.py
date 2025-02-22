@@ -182,6 +182,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         c = fake_image.float().cuda()
         d=torch.cat([clothes_mask,clothes_mask,clothes_mask],1)
         combine = torch.cat([a[0],d[0],b[0],c[0],rgb[0]], 2).squeeze()
+
+        cv2.imwrite(f"rgb/{data['name'][0]}.png", (rgb * 255).astype(np.uint8))
+
         # combine=c[0].squeeze()
         cv_img=(combine.permute(1,2,0).detach().cpu().numpy()+1)/2
         if step % 1 == 0:
@@ -191,11 +194,15 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             n=str(step)+'.jpg'
             cv2.imwrite('sample/'+data['name'][0],bgr)
 
-            cv2.imwrite(f"label/{data['name'][0]}.png", (a[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8))
-            cv2.imwrite(f"clothes_mask/{data['name'][0]}.png", (d[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8))
-            cv2.imwrite(f"real_image/{data['name'][0]}.png", (b[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8))
-            cv2.imwrite(f"fake_image/{data['name'][0]}.png", (c[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8))
-            cv2.imwrite(f"rgb/{data['name'][0]}.png", (rgb * 255).astype(np.uint8))
+            fake_image = (c[0].permute(1,2,0).detach().cpu().numpy() + 1) / 2
+            rgb_fake_image = (fake_image * 255).astype(np.uint8)
+            bgr_fake_image = cv2.cvtColor(rgb_fake_image,cv2.COLOR_RGB2BGR)
+            cv2.imwrite(f"fake_image/{data['name'][0]}.png", bgr_fake_image)
+
+            # cv2.imwrite(f"label/{data['name'][0]}.png", (a[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8))
+            # cv2.imwrite(f"clothes_mask/{data['name'][0]}.png", (d[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8))
+            # cv2.imwrite(f"real_image/{data['name'][0]}.png", (b[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8))
+            
 
         step += 1
         print(step)
