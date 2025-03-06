@@ -66,16 +66,13 @@ dataset = data_loader.load_data()
 
 person_data = next(iter(dataset))  # Fetch the first person sample
 
-
-os.makedirs("input_data", exist_ok=True)
+print(person_data)
 
 
 person_image = person_data['image']
 person_label = person_data['label']
 person_mask = person_data['mask']
 person_pose = person_data['pose']
-
-cv2.imwrite(f"output/person_image.png", person_image)
 
 # Debugging prints
 # print("Person Image Shape:", person_image.shape)
