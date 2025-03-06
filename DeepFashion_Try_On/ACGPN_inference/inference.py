@@ -61,12 +61,21 @@ def apply_dresses(person_image, label, mask, pose, dresses):
 # Load single person image and its related data
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
+
+# TODO GET THE IMAGE FROM USER AND MAKE A RECOMMENDATION CALL
+
 person_data = next(iter(dataset))  # Fetch the first person sample
+
+
+os.makedirs("input_data", exist_ok=True)
+
 
 person_image = person_data['image']
 person_label = person_data['label']
 person_mask = person_data['mask']
 person_pose = person_data['pose']
+
+cv2.imwrite(f"output/person_image.png", person_image)
 
 # Debugging prints
 # print("Person Image Shape:", person_image.shape)
