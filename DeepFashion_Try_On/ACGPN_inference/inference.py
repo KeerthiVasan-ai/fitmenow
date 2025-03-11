@@ -7,6 +7,9 @@ from options.train_options import TrainOptions
 from models.models import create_model
 import util.util as util
 from data.data_loader import CreateDataLoader
+import warnings
+
+warnings.filterwarnings("ignore")
 
 def changearm(label):
     arm1 = torch.FloatTensor((label.cpu().numpy() == 11).astype(np.int_))
@@ -63,13 +66,14 @@ def apply_dresses(person_image, label, mask, pose, dresses):
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 
-print(dataset)
+# print(dataset)
 
-# TODO GET THE IMAGE FROM USER AND MAKE A RECOMMENDATION CALL
+
+# TODO Get the dress image from the recommendation
 
 person_data = next(iter(dataset))  # Fetch the first person sample
 
-# print(person_data)
+print(person_data)
 
 
 person_image = person_data['image']
