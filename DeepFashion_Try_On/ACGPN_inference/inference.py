@@ -82,7 +82,7 @@ def get_data_by_filename(dataset, filename):
 
 def find_data_by_name(dataset, target_name):
     for data in dataset:
-        if "name" in data and data["name"] == target_name:
+        if data["name"] == target_name:
             return data
     return None
 
