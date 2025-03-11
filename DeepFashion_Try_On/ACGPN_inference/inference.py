@@ -63,13 +63,7 @@ def apply_dresses(person_image, label, mask, pose, dresses):
         print(f"Saved output: output/dress_{i}.png")
 
 def get_data_by_filename(dataset, filename):
-    """
-    Retrieves all data corresponding to a specific file name from the dataset dictionary.
-    
-    :param dataset: Dictionary containing dataset elements.
-    :param filename: The file name to search for.
-    :return: A dictionary with the extracted data for the given filename, or None if not found.
-    """
+
     if "name" not in dataset:
         raise KeyError("Dataset does not contain a 'name' key.")
     
@@ -83,16 +77,23 @@ def get_data_by_filename(dataset, filename):
     extracted_data = {key: dataset[key][index] for key in dataset.keys()}
     return extracted_data
 
+def preprocess_dataset(dataset):
+    return {data["name"]: data for data in dataset if "name" in data}
+
+def find_data_by_name(dataset_dict, target_name):
+    return dataset_dict.get(target_name)
+
 # Load single person image and its related data
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 
+dataset_dict = preprocess_dataset(dataset)
 # print(dataset)
 
 
 # TODO Get the dress image from the recommendation
 
-person_data = get_data_by_filename(dataset,"000001_0.jpg")  # Fetch the first person sample
+person_data = find_data_by_name(dataset_dict,"000001_0.jpg")  # Fetch the first person sample
 
 # print(person_data.keys())
 
