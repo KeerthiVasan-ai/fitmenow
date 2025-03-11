@@ -30,6 +30,7 @@ def apply_dresses(person_image, label, mask, pose, dresses):
     os.makedirs("output", exist_ok=True)
 
     for i, dress in enumerate(dresses):
+        # print(dress)
         # Load dress mask
         mask_clothes = torch.FloatTensor((label.cpu().numpy() == 4).astype(np.int_))
         mask_fore = torch.FloatTensor((label.cpu().numpy() > 0).astype(np.int_))
@@ -62,11 +63,13 @@ def apply_dresses(person_image, label, mask, pose, dresses):
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 
+print(dataset)
+
 # TODO GET THE IMAGE FROM USER AND MAKE A RECOMMENDATION CALL
 
 person_data = next(iter(dataset))  # Fetch the first person sample
 
-print(person_data)
+# print(person_data)
 
 
 person_image = person_data['image']
