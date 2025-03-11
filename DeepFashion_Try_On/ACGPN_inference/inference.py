@@ -73,7 +73,7 @@ dataset = data_loader.load_data()
 
 person_data = next(iter(dataset))  # Fetch the first person sample
 
-print(person_data)
+print(person_data.keys())
 
 
 person_image = person_data['image']
