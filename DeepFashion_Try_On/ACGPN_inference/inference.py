@@ -92,7 +92,7 @@ dataset = data_loader.load_data()
 
 # TODO Get the dress image from the recommendation
 
-person_data = get_data_by_filename(dataset,"002103_0.jpg")  # Fetch the first person sample
+person_data = get_data_by_filename(dataset,"000001_0.jpg")  # Fetch the first person sample
 
 # print(person_data.keys())
 
