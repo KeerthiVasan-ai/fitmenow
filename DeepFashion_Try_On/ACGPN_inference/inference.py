@@ -62,6 +62,27 @@ def apply_dresses(person_image, label, mask, pose, dresses):
         cv2.imwrite(f"output/dress_{i}.png", output_image)
         print(f"Saved output: output/dress_{i}.png")
 
+def get_data_by_filename(dataset, filename):
+    """
+    Retrieves all data corresponding to a specific file name from the dataset dictionary.
+    
+    :param dataset: Dictionary containing dataset elements.
+    :param filename: The file name to search for.
+    :return: A dictionary with the extracted data for the given filename, or None if not found.
+    """
+    if "name" not in dataset:
+        raise KeyError("Dataset does not contain a 'name' key.")
+    
+    # Find the index of the filename in the 'name' list
+    try:
+        index = dataset["name"].index(filename)
+    except ValueError:
+        return None  # Filename not found
+    
+    # Extract the corresponding data from all dataset keys
+    extracted_data = {key: dataset[key][index] for key in dataset.keys()}
+    return extracted_data
+
 # Load single person image and its related data
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
@@ -71,9 +92,9 @@ dataset = data_loader.load_data()
 
 # TODO Get the dress image from the recommendation
 
-person_data = next(iter(dataset))  # Fetch the first person sample
+person_data = get_data_by_filename(dataset,"002103_0.jpg")  # Fetch the first person sample
 
-print(person_data.keys())
+# print(person_data.keys())
 
 
 person_image = person_data['image']
