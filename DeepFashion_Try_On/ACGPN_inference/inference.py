@@ -67,21 +67,25 @@ def find_data_by_name(dataset, target_name):
     for data in dataset:
         print(data["name"])
         if data["name"] == target_name:
+            print("Found")
             return data
+    print("Not Found")
     return None
 
 def find_cloth_data_by_name(dataset,cloth_data:list):
     cloths = []
     for data in dataset:
         if(data["name"] in cloth_data):
+            print(data["name"])
             cloths.append(data)
+    print(cloths)
     return cloths
 
 # Load single person image and its related data
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 
-cloth_data_list = ["003069_1.jpg","013245_1.jpg","005101_1.jpg","004904_1.jpg","010984_1.jpg"]
+cloth_data_list = [["003069_1.jpg"],["013245_1.jpg"],["005101_1.jpg"],["004904_1.jpg"],["010984_1.jpg"]]
 
 # ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/003069_1.jpg', 
 #  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/013245_1.jpg', 
