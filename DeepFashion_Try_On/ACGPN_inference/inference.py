@@ -79,8 +79,14 @@ dataset = data_loader.load_data()
 
 # Define single person and multiple dresses
 person_name = ["002103_0.jpg"]
-cloth_data_list = [["003069_0.jpg"], ["013245_0.jpg"], ["005101_0.jpg"], ]
+cloth_data_list = [["011623_1.jpg"], ["013764_1.jpg"], ["005101_1.jpg"], ]
                 #    ["004904_0.jpg"], ["010984_0.jpg"]]
+
+# ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/011623_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/013764_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/005101_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/004904_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/012838_1.jpg']
 
 # Find person and clothing data
 person_data = find_data_by_name(dataset, person_name)
