@@ -2,82 +2,104 @@ import os
 import cv2
 import torch
 import numpy as np
-import torchvision.transforms as transforms
 from torch.autograd import Variable
+from torchvision import transforms
+import torchvision.transforms.functional as TF
+import warnings
+
+# Ignore warnings
+warnings.filterwarnings("ignore")
+
+# Import your existing deep learning model setup
 from options.train_options import TrainOptions
 from models.models import create_model
 from data.data_loader import CreateDataLoader
-import matplotlib.pyplot as plt
 
-import warnings
-warnings.filterwarnings("ignore")
-
-# Initialize options and model
+# Parse options
 opt = TrainOptions().parse()
+
+# Load the deep learning model
 model = create_model(opt)
 
-# Function to improve edge detection for dress segmentation
-def get_edge_mask(image_path):
-    """Enhance edge detection for better segmentation."""
-    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    img = cv2.GaussianBlur(img, (5, 5), 0)
-    edges = cv2.Canny(img, 50, 150)
-    return edges
+# Function to load and preprocess dress image
+def load_dress_image(dress_path):
+    dress_img = cv2.imread(dress_path)  # Read image
+    dress_img = cv2.cvtColor(dress_img, cv2.COLOR_BGR2RGB)  # Convert to RGB
+    dress_img = cv2.resize(dress_img, (192, 256))  # Resize to match model input
 
-# Function to blend dress smoothly
-def blend_images(foreground, background, mask):
-    """Perform Poisson blending for seamless results."""
-    center = (background.shape[1] // 2, background.shape[0] // 2)
-    blended = cv2.seamlessClone(foreground, background, mask, center, cv2.NORMAL_CLONE)
-    return blended
+    # Normalize and convert to tensor
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # Normalize to [-1, 1]
+    ])
+    dress_tensor = transform(dress_img).unsqueeze(0)  # Add batch dimension
 
-# Function to apply dress fitting
-def apply_dress_fitting(person_data, dress_path):
-    """Applies a dress to a person image with improved alignment and blending."""
-    
-    person_image = person_data["image"]
-    label = person_data["label"]
-    mask = person_data["mask"]
-    pose = person_data["pose"]
-    
-    # Load dress image
-    dress = cv2.imread(dress_path)
-    dress = cv2.resize(dress, (192, 256))  # Resize to match person image size
-    
-    # Generate dress edge map
-    edge_mask = get_edge_mask(dress_path)
+    return dress_tensor, dress_img
 
-    # Apply Model
-    _, fake_image, _, _, _, _, _, _, rgb, _ = model(
-        Variable(label.cuda()),
-        Variable(torch.tensor(edge_mask).cuda()),
-        Variable(person_image.cuda()),
-        Variable(mask.cuda()),
-        Variable(torch.tensor(dress).cuda()),
-        Variable(label.cuda()),
-        Variable(person_image.cuda()),
-        Variable(pose.cuda()),
-        Variable(person_image.cuda()),
-        Variable(mask.cuda())
-    )
+# Function to compute edge map
+def compute_edge_map(dress_img):
+    gray = cv2.cvtColor(dress_img, cv2.COLOR_RGB2GRAY)  # Convert to grayscale
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # Reduce noise
+    edges = cv2.Canny(blurred, 50, 150)  # Apply Canny edge detection
 
-    # Convert model output to image format
-    output_image = (fake_image[0].permute(1, 2, 0).detach().cpu().numpy() + 1) / 2
-    output_image = (output_image * 255).astype(np.uint8)
+    # Convert edges to tensor and normalize
+    edge_tensor = TF.to_tensor(edges).unsqueeze(0)  # Shape: (1, 1, H, W)
+    return edge_tensor
 
-    # Blend with original image for better natural look
-    mask_foreground = (mask[0].cpu().numpy() * 255).astype(np.uint8)
-    output_image = blend_images(output_image, person_image.cpu().numpy(), mask_foreground)
+def changearm(label):
+    arm1 = torch.FloatTensor((label.cpu().numpy() == 11).astype(np.int_))
+    arm2 = torch.FloatTensor((label.cpu().numpy() == 13).astype(np.int_))
+    noise = torch.FloatTensor((label.cpu().numpy() == 7).astype(np.int_))
+    label = label * (1 - arm1) + arm1 * 4
+    label = label * (1 - arm2) + arm2 * 4
+    label = label * (1 - noise) + noise * 4
+    return label
+
+# Function to apply a dress onto a person
+def apply_dress_to_user(person_data, dress_path):
+    """Loads a dress, computes the edge map, and applies it to the person."""
+
+    # Extract person data
+    person_image = person_data['image'].cuda()
+    person_label = person_data['label'].cuda()
+    person_mask = person_data['mask'].cuda()
+    person_pose = person_data['pose'].cuda()
+
+    all_clothes_label = changearm(person_label)
+
+    # Load dress image and compute edge map
+    dress_tensor, dress_np = load_dress_image(dress_path)
+    edge_tensor = compute_edge_map(dress_np)
+
+    dress_tensor, edge_tensor = dress_tensor.cuda(), edge_tensor.cuda()
+
+    # Forward pass through the model
+    with torch.no_grad():  # Disable gradient computation for efficiency
+        _, fake_image, _, _, _, _, _, _, _, _ = model(
+            Variable(person_label),
+            Variable(edge_tensor),
+            Variable(person_image),
+            Variable(person_mask),
+            Variable(dress_tensor),
+            Variable(all_clothes_label.cuda()),
+            Variable(person_image),
+            Variable(person_pose),
+            Variable(person_image),
+            Variable(person_mask)
+        )
+
+    # Convert the output to an image
+    fake_image = fake_image[0].cpu().permute(1, 2, 0).detach().numpy()
+    fake_image = (fake_image + 1) / 2  # Normalize to [0, 1]
+    fake_image = (fake_image * 255).astype(np.uint8)
+
+    # Blend the output with the original image
+    blended_image = cv2.addWeighted(dress_np, 0.4, fake_image, 0.6, 0)
 
     # Save the output
-    output_path = "output/fitted_result.png"
-    cv2.imwrite(output_path, cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR))
-    print(f"Saved improved result: {output_path}")
-
-    # Display
-    plt.imshow(cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB))
-    plt.axis("off")
-    plt.show()
+    output_path = f"output/fitted_{os.path.basename(dress_path)}"
+    cv2.imwrite(output_path, cv2.cvtColor(blended_image, cv2.COLOR_RGB2BGR))
+    print(f"Saved fitted dress: {output_path}")
 
 # Load dataset
 data_loader = CreateDataLoader(opt)
@@ -85,23 +107,18 @@ dataset = data_loader.load_data()
 
 # Find person data
 person_data = next(iter(dataset))
-# for data in dataset:
-#     if data["name"] == ["002103_0.jpg"]:  # Change this to your target person's image
-#         person_data = data
-#         break
 
-# if person_data is None:
-#     raise ValueError("Person image not found in dataset!")
-
-dress_images = ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/003069_1.jpg', 
-                '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/013245_1.jpg', 
-                '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/005101_1.jpg', 
-                '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/004904_1.jpg', 
-                '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/010984_1.jpg'
-            ]
+# List of dress images from folder
+dress_images = [
+    '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/003069_1.jpg',
+    '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/013245_1.jpg',
+    '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/005101_1.jpg',
+    '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/004904_1.jpg',
+    '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/010984_1.jpg'
+]
 
 # Apply each dress to the person image
 os.makedirs("output", exist_ok=True)  # Ensure output folder exists
 
 for dress_path in dress_images:
-    apply_dress_fitting(person_data, dress_path)
+    apply_dress_to_user(person_data, dress_path)
