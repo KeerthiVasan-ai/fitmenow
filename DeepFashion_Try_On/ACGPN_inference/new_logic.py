@@ -65,7 +65,7 @@ def apply_dress_to_user(person_data, dress_path):
     person_mask = person_data['mask'].cuda()
     person_pose = person_data['pose'].cuda()
 
-    all_clothes_label = changearm(person_label)
+    all_clothes_label = changearm(person_data["label"])
 
     # Load dress image and compute edge map
     dress_tensor, dress_np = load_dress_image(dress_path)
