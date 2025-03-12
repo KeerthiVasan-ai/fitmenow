@@ -8,6 +8,7 @@ from models.models import create_model
 import util.util as util
 from data.data_loader import CreateDataLoader
 import warnings
+from matplotlib import pyplot as plt
 
 warnings.filterwarnings("ignore")
 
@@ -40,6 +41,16 @@ def apply_dresses(person_image, label, mask, pose, dresses):
         img_fore = person_image * mask_fore
         img_fore_wc = img_fore * mask_fore
         all_clothes_label = changearm(label)
+
+        dress_color = dress["color"].permute(1, 2, 0).cpu().numpy()  # Convert to (H, W, C)
+        dress_color = (dress_color + 1) / 2  # Normalize from [-1,1] to [0,1]
+
+        # Plot the dress color image
+        plt.figure(figsize=(3, 3))
+        plt.imshow(dress_color)
+        plt.axis("off")
+        plt.title(f"Recommendation {i+1}")
+        plt.show()
 
         # Forward Pass
         _, fake_image, _, _, _, _, _, _, rgb, _ = model(
@@ -85,7 +96,7 @@ def find_cloth_data_by_name(dataset,cloth_data:list):
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 
-# cloth_data_list = [["003069_0.jpg"],["013245_0.jpg"],["005101_0.jpg"],["004904_0.jpg"],["010984_0.jpg"]]
+cloth_data_list = [["003069_0.jpg"],["013245_0.jpg"],["005101_0.jpg"],["004904_0.jpg"],["010984_.jpg"]]
 
 # ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/003069_1.jpg', 
 #  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/013245_1.jpg', 
@@ -94,7 +105,7 @@ dataset = data_loader.load_data()
 #  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/010984_1.jpg']
 
 person_data = find_data_by_name(dataset,["002103_0.jpg"])
-# cloths = find_cloth_data_by_name(dataset,cloth_data_list)
+cloths = find_cloth_data_by_name(dataset,cloth_data_list)
 
 person_image = person_data['image']
 person_label = person_data['label']
@@ -104,4 +115,4 @@ person_pose = person_data['pose']
 
 
 # Apply all dresses in the dataset to the single person image
-apply_dresses(person_image, person_label, person_mask, person_pose, dataset)
+apply_dresses(person_image, person_label, person_mask, person_pose, cloths)
