@@ -79,7 +79,7 @@ dataset = data_loader.load_data()
 
 # Define single person and multiple dresses
 person_name = ["002103_0.jpg"]
-cloth_data_list = [["011623_1.jpg"], ["013764_1.jpg"], ["005101_1.jpg"], ]
+cloth_data_list = [["011623_0.jpg"], ["013764_0.jpg"], ["005101_0.jpg"], ]
                 #    ["004904_0.jpg"], ["010984_0.jpg"]]
 
 # ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/011623_1.jpg', 
