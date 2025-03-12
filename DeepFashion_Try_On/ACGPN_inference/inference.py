@@ -62,23 +62,6 @@ def apply_dresses(person_image, label, mask, pose, dresses):
         cv2.imwrite(f"output/dress_{i}.png", output_image)
         print(f"Saved output: output/dress_{i}.png")
 
-def get_data_by_filename(dataset, filename):
-
-    if "name" not in dataset:
-        raise KeyError("Dataset does not contain a 'name' key.")
-    
-    # Find the index of the filename in the 'name' list
-    try:
-        index = dataset["name"].index(filename)
-    except ValueError:
-        return None  # Filename not found
-    
-    # Extract the corresponding data from all dataset keys
-    extracted_data = {key: dataset[key][index] for key in dataset.keys()}
-    return extracted_data
-
-# def preprocess_dataset(dataset):
-#     return {data["name"]: data for data in dataset if "name" in data}
 
 def find_data_by_name(dataset, target_name):
     for data in dataset:
@@ -87,31 +70,34 @@ def find_data_by_name(dataset, target_name):
             return data
     return None
 
+def find_cloth_data_by_name(dataset,cloth_data:list):
+    cloths = []
+    for data in dataset:
+        if(data["name"] in cloth_data):
+            cloths.append(data)
+    return cloths
+
 # Load single person image and its related data
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 
-# dataset_dict = preprocess_dataset(dataset)
-# print(dataset)
+cloth_data_list = ["003069_1.jpg","013245_1.jpg","005101_1.jpg","004904_1.jpg","010984_1.jpg"]
 
+# ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/003069_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/013245_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/005101_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/004904_1.jpg', 
+#  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/010984_1.jpg']
 
-# TODO Get the dress image from the recommendation
-
-person_data = find_data_by_name(dataset,["000001_0.jpg"])  # Fetch the first person sample
-
-# print(person_data.keys())
-
+person_data = find_data_by_name(dataset,["002103_0.jpg"])
+cloths = find_cloth_data_by_name(dataset,cloth_data_list)
 
 person_image = person_data['image']
 person_label = person_data['label']
 person_mask = person_data['mask']
 person_pose = person_data['pose']
 
-# Debugging prints
-# print("Person Image Shape:", person_image.shape)
-# print("Label Shape:", person_label.shape)
-# print("Mask Shape:", person_mask.shape)
-# print("Pose Shape:", person_pose.shape)
+
 
 # Apply all dresses in the dataset to the single person image
-apply_dresses(person_image, person_label, person_mask, person_pose, dataset)
+apply_dresses(person_image, person_label, person_mask, person_pose, cloths)
