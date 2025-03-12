@@ -79,7 +79,7 @@ dataset = data_loader.load_data()
 
 # Define single person and multiple dresses
 person_name = ["002103_0.jpg"]
-cloth_data_list = [["011623_0.jpg"], ["013764_0.jpg"], ["005101_0.jpg"], ]
+# cloth_data_list = [["011623_0.jpg"], ["013764_0.jpg"], ["005101_0.jpg"], ]
                 #    ["004904_0.jpg"], ["010984_0.jpg"]]
 
 # ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/011623_1.jpg', 
@@ -90,15 +90,15 @@ cloth_data_list = [["011623_0.jpg"], ["013764_0.jpg"], ["005101_0.jpg"], ]
 
 # Find person and clothing data
 person_data = find_data_by_name(dataset, person_name)
-cloths = find_cloth_data_by_name(dataset, cloth_data_list)
+# cloths = find_cloth_data_by_name(dataset, cloth_data_list)
 
 # Validate person data
 if person_data is None:
     raise ValueError(f"Person image {person_name} not found in dataset!")
 
 # Validate clothes data
-if not cloths:
-    raise ValueError("No matching clothing images found in dataset!")
+# if not cloths:
+#     raise ValueError("No matching clothing images found in dataset!")
 
 # Extract person image properties
 person_image = person_data['image']
@@ -107,4 +107,4 @@ person_mask = person_data['mask']
 person_pose = person_data['pose']
 
 # Apply all dresses to the person image
-apply_dresses(person_image, person_label, person_mask, person_pose, cloths)
+apply_dresses(person_image, person_label, person_mask, person_pose, dataset)
