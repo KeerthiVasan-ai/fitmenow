@@ -85,7 +85,7 @@ def find_cloth_data_by_name(dataset,cloth_data:list):
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 
-cloth_data_list = [["003069_0.jpg"],["013245_0.jpg"],["005101_0.jpg"],["004904_0.jpg"],["010984_0.jpg"]]
+# cloth_data_list = [["003069_0.jpg"],["013245_0.jpg"],["005101_0.jpg"],["004904_0.jpg"],["010984_0.jpg"]]
 
 # ['/kaggle/input/viton-dataset/ACGPN_TestData/test_color/003069_1.jpg', 
 #  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/013245_1.jpg', 
@@ -94,7 +94,7 @@ cloth_data_list = [["003069_0.jpg"],["013245_0.jpg"],["005101_0.jpg"],["004904_0
 #  '/kaggle/input/viton-dataset/ACGPN_TestData/test_color/010984_1.jpg']
 
 person_data = find_data_by_name(dataset,["002103_0.jpg"])
-cloths = find_cloth_data_by_name(dataset,cloth_data_list)
+# cloths = find_cloth_data_by_name(dataset,cloth_data_list)
 
 person_image = person_data['image']
 person_label = person_data['label']
@@ -104,4 +104,4 @@ person_pose = person_data['pose']
 
 
 # Apply all dresses in the dataset to the single person image
-apply_dresses(person_image, person_label, person_mask, person_pose, cloths)
+apply_dresses(person_image, person_label, person_mask, person_pose, dataset)
